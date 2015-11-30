@@ -71,7 +71,9 @@ void initSigfox(){
       SerialUSB.print(SigFox.read());
     }
   }
-  SerialUSB.println("\n ** Setup OK **");
+  if (DEBUG){
+    SerialUSB.println("\n ** Setup OK **");
+  }
 }
 String getSigfoxFrame(const void* data, uint8_t len){
   String frame = "";
