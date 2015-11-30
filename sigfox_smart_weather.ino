@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+#define SIGFOX_FRAME_LENGTH 12
 #define INTERVAL 600000
 #define DEBUG 0
 
@@ -26,13 +27,7 @@ void setup() {
   
   SigFox.begin(19200);
 
-  if (DEBUG) {
-    // Wait for the user to connect to serial console
-    while (!SerialUSB) {}
-  }
-
-  // Switch SigFox modem to command mode
-  sigfoxCommandMode();
+  initSigfox();
 }
 
 void loop() {
@@ -49,12 +44,8 @@ void loop() {
     SerialUSB.print("\tPressure ");
     SerialUSB.println(frame.pressure);
   }
-
-  // Send data
-  if (DEBUG) {
-    SerialUSB.println("Sending data");
-  }
-  bool answer = sigfoxSend(&frame, sizeof(data));
+ 
+  bool answer = sendSigfox(&frame, sizeof(data));
 
   // Light LED depending on modem answer
   if (answer) {
@@ -71,96 +62,65 @@ void loop() {
   delay(INTERVAL);
 }
 
-// Switch SigFox modem to command mode
-void sigfoxCommandMode() {
+void initSigfox(){
   SigFox.print("+++");
-
-  // Waiting for modem answer
-  while (!SigFox.available()) {
+  while (!SigFox.available()){
     delay(100);
   }
-  while (SigFox.available()) {
-    char answer = (char)SigFox.read();
-    if (DEBUG) {
-      SerialUSB.print(answer);
+  while (SigFox.available()){
+    if (DEBUG){
+      SerialUSB.print(SigFox.read());
+    }
+  }
+  SerialUSB.println("\n ** Setup OK **");
+}
+String getSigfoxFrame(const void* data, uint8_t len){
+  String frame = "";
+  uint8_t* bytes = (uint8_t*)data;
+  
+  if (len < SIGFOX_FRAME_LENGTH){
+    //fill with zeros
+    uint8_t i = SIGFOX_FRAME_LENGTH;
+    while (i-- > len){
+      frame += "00";
     }
   }
 
-  if (DEBUG) {
-    SerialUSB.println("");
-  }
-  delay(10000);
-}
-boolean canSend(long prev){
-  if (prev==0){
-    return true;
-  }
-  unsigned long diff = millis() - prev;
-  return diff >= 600000;
-}
-/* Send any datatype through AT commands. */
-bool sigfoxSend(const void* data, uint8_t len) {
-  uint8_t* bytes = (uint8_t*)data;
-
-  if (DEBUG) {
-    SerialUSB.println("Issuing AT command");
-  }
-  
-  SigFox.print('A');
-  SigFox.print('T');
-  SigFox.print('$');
-  SigFox.print('S');
-  SigFox.print('F');
-  SigFox.print('=');
   //0-1 == 255 --> (0-1) > len
   for(uint8_t i = len-1; i < len; --i) {
-    if (bytes[i] < 16) {SigFox.print("0");}
-    SigFox.print(bytes[i], HEX);
+    if (bytes[i] < 16) {frame+="0";}
+    frame += String(bytes[i], HEX);
   }
-  SigFox.print('\r');
-
-  if (DEBUG) {
-    SerialUSB.print('A');
-    SerialUSB.print('T');
-    SerialUSB.print('$');
-    SerialUSB.print('S');
-    SerialUSB.print('F');
-    SerialUSB.print('=');
-    for(uint8_t i = len-1; i < len; --i) {
-      if (bytes[i] < 16) {SerialUSB.print("0");}
-      SerialUSB.print(bytes[i], HEX);
-    }
-    SerialUSB.print('\r');
-    SerialUSB.println("");
-  }
-
-  bool error = false;
-  // Waiting for modem answer
-  while (!SigFox.available()) {
-    delay(100);
-  }
-  bool firstChar = true;
-  while (SigFox.available()) {
-    char answer = (char)SigFox.read();
-    if (DEBUG) {
-      SerialUSB.print(answer);
-    }
-    if (firstChar) {
-      firstChar = false;
-      if (answer == 'O') { // "OK" message
-        error = false; 
-      } else { // "ERROR" message 
-        error = true;
-      }
-    }
-  }
-  if (DEBUG) {
-    SerialUSB.println("");
-  }
-
-  return !error;
+  
+  return frame;
 }
-
-
-
-
+bool sendSigfox(const void* data, uint8_t len){
+  String frame = getSigfoxFrame(&data, len);
+  String status = "";
+  char output;
+  if (DEBUG){
+    SerialUSB.print("AT$SF=");
+    SerialUSB.println(frame);
+  }
+  SigFox.print("AT$SF=");
+  SigFox.print(frame);
+  SigFox.print("\r");
+  while (!SigFox.available());
+  
+  while(SigFox.available()){
+    output = (char)SigFox.read();
+    status += output;
+    delay(10);
+  }
+  if (DEBUG){
+    SerialUSB.print("Status \t");
+    SerialUSB.println(status);
+  }
+  if (status == "OK\r"){
+    //Success :)
+    return true;
+  }
+  else{
+    return false;
+  }
+}

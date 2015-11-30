@@ -22,3 +22,7 @@ Uses the [http://smarteverything.it](SmartEverything) Arduino board, with a SIGF
 
 
 Now, you should see the decoded frame in the _Device messages_ view
+
+##Thanks
+
+* @aboudou, as i used his [SmartEverything GPS+Sigfox project](https://github.com/aboudou/SmartEverything_SigFox_GPS) as a boilerplate
