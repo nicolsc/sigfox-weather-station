@@ -67,8 +67,9 @@ void initSigfox(){
     delay(100);
   }
   while (SigFox.available()){
+    byte serialByte = SigFox.read();
     if (DEBUG){
-      SerialUSB.print(SigFox.read());
+      SerialUSB.print(serialByte);
     }
   }
   if (DEBUG){
