@@ -17,7 +17,6 @@ struct data {
 
 
 void setup() {
-
   // Init UART devices
   if (DEBUG) {
     SerialUSB.begin(115200);
@@ -95,7 +94,7 @@ String getSigfoxFrame(const void* data, uint8_t len){
   return frame;
 }
 bool sendSigfox(const void* data, uint8_t len){
-  String frame = getSigfoxFrame(&data, len);
+  String frame = getSigfoxFrame(data, len);
   String status = "";
   char output;
   if (DEBUG){
