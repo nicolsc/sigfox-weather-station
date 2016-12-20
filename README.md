@@ -7,7 +7,7 @@ Get sensors values, and send them through the SIGFOX Network
 * Temperature in _°C_
 * Humidity in _%_
 
-Uses the [http://smarteverything.it](SmartEverything) Arduino board, with a SIGFOX module included & various sensors
+Uses the [SmartEverything](http://smarteverything.it) Arduino board, with a SIGFOX module included & various sensors
 
 ##View data on the SIGFOX Cloud
 
