@@ -58,7 +58,7 @@ void loop() {
   ledGreenLight(LOW);
   ledRedLight(LOW);
    
-  for (int i = 0; i < 30; i++) delay(INTERVAL);
+  for (int i = 0; i < 300; i++) delay(INTERVAL);
 }
 
 void initSigfox(){
