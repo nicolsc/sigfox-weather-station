@@ -16,7 +16,7 @@ Uses the [SmartEverything](http://smarteverything.it) Arduino board, with a SIGF
 * Click _Edit_
 * Update the _Display type_
 	* Custom
-	* `pressure::uint:32 temperature::float:32 humidity::uint:32`
+	* `pressure::uint:16 temperature::float:32 humidity::uint:16`
 
 * Enjoy :)
 
