@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #define SIGFOX_FRAME_LENGTH 12
-#define INTERVAL 600000
+#define INTERVAL 2000
 #define DEBUG 0
 
 unsigned long previousSendTime = 0;
@@ -57,8 +57,8 @@ void loop() {
   delay(1000);
   ledGreenLight(LOW);
   ledRedLight(LOW);
-  
-  delay(INTERVAL);
+   
+  for (int i = 0; i < 300; i++) delay(INTERVAL);
 }
 
 void initSigfox(){
